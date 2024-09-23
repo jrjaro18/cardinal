@@ -1,35 +1,69 @@
-import { View, Text, TouchableOpacity, Vibration, ScrollView } from 'react-native'
-import React, { useState, useCallback, useMemo, useLayoutEffect } from 'react'
-import { useAuth } from '../context/AuthContext'
+import { View, Text, TouchableOpacity, Vibration, StyleSheet, ScrollView, Button } from 'react-native'
+import React, { useState, useCallback, useMemo, useLayoutEffect, useRef } from 'react'
+import { useTheme } from '../context/ThemeContext'
 import { StatusBar } from 'react-native'
-import { useFonts, Quicksand_400Regular, Quicksand_500Medium } from '@expo-google-fonts/dev'
-import { Calendar, CalendarUtils } from 'react-native-calendars';
-import { Image } from 'expo-image'
-import { FontAwesome6, Foundation, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
+import { CalendarUtils } from 'react-native-calendars';
+import {
+  BottomSheetModal,
+  BottomSheetView,
+  BottomSheetModalProvider,
+  BottomSheetBackdrop,
+  BottomSheetScrollView,
+} from '@gorhom/bottom-sheet';
+
+import Header from '../../components/home/Header'
+import CalendarComponent from '../../components/home/Calendar'
+import Remaing from '../../components/home/Remaing'
+import TaskIcons from '../../components/home/TaskIcons'
+import Routines from '../../components/home/Routines'
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import Modal from '../../components/home/Modal';
 
 const INITIAL_DATE = new Date().getTime();
 
-const home = () => {
+const Home = () => {
   const statusbarheight = StatusBar.currentHeight;
-  const { logout } = useAuth()
-
+  const { theme, toggleTheme } = useTheme();
   const [selected, setSelected] = useState(INITIAL_DATE);
-  const [currentMonth, setCurrentMonth] = useState(INITIAL_DATE);
+  const [currentMonth, setCurrentMonth] = useState(null);
 
-  const getDate = (count) => {
-    const date = new Date(INITIAL_DATE);
-    const newDate = new Date(date.setDate(date.getDate() + count)); // Create a new Date object
+  // bottom sheet modal
+  const bottomSheetModalRef = useRef(null);
+  const snapPoints = useMemo(() => ['75%'], []);
+  const handlePresentModalPress = useCallback(() => {
+    bottomSheetModalRef.current?.present();
+  }, []);
+  const handleSheetChanges = useCallback((index) => {
+    console.log('handleSheetChanges', index);
+    if (index === -1) setSelected(INITIAL_DATE);
+  }, []);
+  const backdropComponent = useCallback((props) => {
+    return (
+      <BottomSheetBackdrop
+        {...props}
+        enableTouchThrough={false}
+        pressBehavior={'close'}
+        disappearsOnIndex={-1}
+        appearsOnIndex={0}
+      />
+    )
+  })
+
+  // Get the date for the current month
+  const getDate = (date, count) => {
+    const t_date = new Date(date);
+    const newDate = new Date(t_date.setDate(t_date.getDate() + count)); // Create a new Date object
     return CalendarUtils.getCalendarDateString(newDate); // Pass the new Date object
   };
 
-
   const onDayPress = useCallback((day) => {
     setSelected(day.dateString);
+    Vibration.vibrate(5);
+    handlePresentModalPress();
   }, []);
 
   useLayoutEffect(() => {
-    setCurrentMonth(getDate(0));
-    setSelected(getDate(0));
+    setCurrentMonth(getDate(INITIAL_DATE, 0));
   }, []);
 
   const marked = useMemo(() => {
@@ -38,211 +72,52 @@ const home = () => {
         selected: true,
         disableTouchEvent: true,
         selectedColor: 'rgb(0, 122, 255)',
-        selectedTextColor: 'white'
-      }
+        selectedTextColor: 'white',
+      },
     };
   }, [selected]);
 
-  let [fontsLoaded] = useFonts({
-    Quicksand_400Regular,
-    Quicksand_500Medium
-  })
-
-  if (!fontsLoaded) {
-    return null
-  }
-
 
   return (
-    <View
-      style={{
-        paddingTop: statusbarheight,
-      }}
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <View
+        style={{ paddingTop: statusbarheight }}
+        className="pt-3 px-3 pb-1 flex-1 bg-neutral-50 dark:bg-neutral-950"
+      >
+        <Header />
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <CalendarComponent
+            currentMonth={currentMonth}
+            theme={theme}
+            onDayPress={onDayPress}
+            marked={marked}
+            setCurrentMonth={setCurrentMonth}
+          />
+          <Remaing />
+          <TaskIcons />
+          <Routines />
 
-      className="p-3 flex-1 bg-stone-50"
-    >
-      <View className="mb-4">
-        <View className="flex justify-between flex-row items-center">
-          <Text
-            style={{
-              fontFamily: 'Quicksand_400Regular',
-            }}
-            className="text-5xl mt-5 tracking-wide">
-            Cardinal
-          </Text>
-          <TouchableOpacity
-            onPress={() => {
-              //vibrate
-              Vibration.vibrate(20)
-            }}
-          >
-            <Image
-              source="https://networthsize.com/wp-content/uploads/2020/04/Tom-Holland-Net-Worth-1920x1440.jpg"
-              placeholder={"|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj["}
-              className="w-11 h-11 rounded-full mt-4"
-              transition={10}
-              contentFit='cover'
-            />
+          {/* Toggle themes button */}
+          <TouchableOpacity onPress={toggleTheme}>
+            <Text className="p-2 text-red-400">Toggle Theme</Text>
           </TouchableOpacity>
-
-        </View>
-
-        <Text
-          style={{
-            fontFamily: 'Quicksand_400Regular',
-          }}
-          className="text-lg ml-1"
-        >
-          {new Date().toDateString()}
-        </Text>
+        </ScrollView>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} >
+      <Modal
+        bottomSheetModalRef={bottomSheetModalRef}
+        snapPoints={snapPoints}
+        handleSheetChanges={handleSheetChanges}
+        backdropComponent={backdropComponent}
+        selected={selected}
+        setSelected={setSelected}
+        getDate={getDate}
+        theme={theme}
+      />
+      
+    </GestureHandlerRootView>
+  );
+};
 
-        {/* Calendar */}
-        <View className="mb-7">
-          <Calendar
-            style={{
-              borderRadius: 30,
-              elevation: 2,
-              paddingBottom: 10,
-            }}
-            theme={{
-              arrowColor: "rgb(0, 122, 255)",
-            }}
-            current={currentMonth}
-            onDayPress={onDayPress}
-            markedDates={marked}
-            onMonthChange={(month) => setCurrentMonth(month.dateString)}
-          />
+export default Home;
 
-        </View>
-
-        {/* Tasks and Goals */}
-        <View
-          className="flex flex-row justify-around"
-        >
-          <TouchableOpacity
-            className=" w-[48%] p-2 bg-zinc-950 rounded-2xl elevation"
-            activeOpacity={0.5}
-            onPress={() => {
-              //vibrate
-              Vibration.vibrate(20)
-            }}
-          >
-            <Text className="text-zinc-50 text-xl" style={{ fontFamily: "Quicksand_400Regular" }}>
-              Tasks {"\n"}Remaining: <Text className="font-extrabold">99</Text>
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            className="w-[48%] p-2 bg-zinc-50 rounded-2xl border-2 elevation-[3]"
-            onPress={() => {
-              //vibrate
-              Vibration.vibrate(20)
-            }}
-          >
-            <Text className="text-xl tex-zinc-50" style={{ fontFamily: "Quicksand_400Regular" }}>
-              Goals {"\n"}Remaining: <Text className="font-extrabold">10</Text>
-            </Text>
-          </TouchableOpacity>
-
-        </View>
-
-        {/* Show All Tasks */}
-        <View className="my-3">
-          <TouchableOpacity
-            className=" bg-white rounded-xl mx-1 p-2 elevation h-14 flex justify-center items-center"
-            onPress={() => {
-              Vibration.vibrate(20)
-            }}
-          >
-            <Text className="text-center text-lg"
-              style={{ fontFamily: "Quicksand_500Medium" }}
-            >
-              Show All Tasks
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Icons for tasks */}
-        <View className="flex flex-row justify-around my-3">
-          <TouchableOpacity className="flex items-center"
-            onPress={() => {
-              Vibration.vibrate(20)
-            }}
-          >
-            <View className="bg-stone-900 p-3 rounded-full h-16 w-16 justify-center flex items-center">
-              <MaterialIcons name="task-alt" size={34} color="white" />
-            </View>
-            <Text className="text-center text-sm mt-1 font-semibold tracking-wide"
-              style={{ fontFamily: "Quicksand_500Medium" }}
-            >
-              Add a{"\n"}Task
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity className="flex items-center"
-            onPress={() => {
-              Vibration.vibrate(20)
-            }}
-          >
-            <View className="bg-stone-900 p-3 rounded-full h-16 w-16 justify-center flex items-center">
-              <MaterialCommunityIcons name="book-open-page-variant-outline" size={34} color="white" />
-            </View>
-            <Text className="text-center text-sm mt-1 font-semibold tracking-wide"
-              style={{ fontFamily: "Quicksand_500Medium" }}
-            >
-              Start a{"\n"}Habit
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity className="flex items-center"
-            onPress={() => {
-              Vibration.vibrate(20)
-            }}
-          >
-            <View className="bg-stone-900 p-3 rounded-full h-16 w-16 justify-center flex items-center">
-              <Foundation name="mountains" size={34} color="white" />
-            </View>
-            <Text className="text-center text-sm mt-1 font-semibold tracking-wide"
-              style={{ fontFamily: "Quicksand_500Medium" }}
-            >
-              Create a{"\n"}Goal
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity className="flex items-center"
-            onPress={() => {
-              Vibration.vibrate(20)
-            }}
-          >
-            <View className="bg-stone-900 p-3 rounded-full h-16 w-16 justify-center flex items-center">
-              <MaterialIcons name="people-alt" size={34} color="white" />
-            </View>
-            <Text className="text-center text-sm mt-1 font-semibold tracking-wide"
-              style={{ fontFamily: "Quicksand_500Medium" }}
-            >
-              Join a{"\n"}Group
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* idea: missed and soon approaching deadline */}
-
-
-
-        {/* Logout */}
-        <TouchableOpacity onPress={() => logout()}>
-          <Text>Logout</Text>
-        </TouchableOpacity>
-        
-        <View className="h-20"></View>
-
-      </ScrollView>
-
-    </View>
-  )
-}
-
-export default home
-
-{/* <TouchableOpacity onPress={() => logout()}>
-        <Text>Logout</Text>
-      </TouchableOpacity> */}

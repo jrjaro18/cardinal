@@ -1,0 +1,11 @@
+making ideas:
+clicking on add buttons will redirect to a new page
+pressing on any show task, show habit, show goal will redirect to a new page
+there will be a profile page
+on pressing calendar it will open a modal and show that days task, habit, goal
+
+app ideas:
+option to star mark a task and show
+on the profile page show general stuffs
+the next tab will show the task, habit, goal 
+for habits use something like github and leetcode streaks

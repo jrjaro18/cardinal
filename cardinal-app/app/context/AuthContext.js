@@ -1,7 +1,7 @@
 import React, { createContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
-import { Alert, ToastAndroid } from 'react-native';
+import { ToastAndroid } from 'react-native';
 
 // Create the AuthContext
 export const AuthContext = createContext();
@@ -10,8 +10,8 @@ export const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
 
   const demoUser = {
-    email: 'Bob@gmail.com',
-    password: 'Bob@1234'
+    email: 'bob@gmail.com',
+    password: 'Bob'
   };
 
   const [user, setUser] = useState(null);
@@ -42,6 +42,7 @@ export const AuthProvider = ({ children }) => {
       setUser(userData);
       await AsyncStorage.setItem('user', JSON.stringify(userData));
       ToastAndroid.show('Authenticated successfully', ToastAndroid.SHORT);
+      
       router.replace('/(app)');
     } else {
       ToastAndroid.show('Invalid email or password', ToastAndroid.SHORT, ToastAndroid.CENTER);
