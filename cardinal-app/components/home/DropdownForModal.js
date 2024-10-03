@@ -15,13 +15,15 @@ const DropdownForModal = ({theme}) => {
     return (
         <View>
             <Dropdown
+                autoScroll={false}
+                dropdownPosition={'bottom'}
                 style={[
                     {
-                        height: 50,
+                        height: 60,
                         borderColor: 'gray',
                         borderWidth: 0.5,
                         borderRadius: 8,
-                        paddingHorizontal: 8,
+                        padding:8,  
                     },
                     isFocus && {
                         borderColor: 'rgb(0, 122, 255)',
@@ -33,10 +35,11 @@ const DropdownForModal = ({theme}) => {
                     fontFamily: 'Quicksand_500Medium',
                     fontSize: 20
                 }}
+                
                 selectedText={value}
                 data={data}
                 search={false}
-                maxHeight={300}
+                maxHeight={60*4}
                 labelField="label"
                 valueField="value"
                 value={value}
@@ -56,7 +59,7 @@ const DropdownForModal = ({theme}) => {
                 renderItem={(item, selected) => (
                     <View className="flex flex-row px-2 pb-4 items-end"
                         style={{
-                            height: 330 / 6,
+                            height: 60,
                             backgroundColor: selected ? (theme === 'light' ? '#f2f1f1' : '#212121') : (theme === 'light' ? 'white' : '#171717'),
                             borderWidth: selected ? 1 : 0.5,
                             borderColor: selected ? 'rgb(0, 122, 255)' : 'gray',
@@ -94,7 +97,13 @@ const DropdownForModal = ({theme}) => {
                     </View>
                 )}
                 showsVerticalScrollIndicator
-                containerStyle={{ height: 275, borderWidth: 0, borderBottomWidth: 0.25, borderBottomColor: 'lightgray' }}
+                containerStyle={{ 
+                    height: 275, 
+                    borderWidth: 0, 
+                    borderBottomWidth: 0.25, 
+                    borderBottomColor: 'lightgray', 
+                    marginTop:4 
+                }}
             />
         </View>
     )
@@ -105,7 +114,7 @@ export default memo(DropdownForModal)
 
 const data = [
     {
-        label: 'All Tasks',
+        label: 'Remaining Tasks',
         value: 'all',
         icon: {
             name: 'list-bullet',
@@ -122,7 +131,7 @@ const data = [
             type: 'Foundation'
         }
     },
-    {
+    /* {
         label: 'Starred',
         value: 'starred',
         icon: {
@@ -130,8 +139,8 @@ const data = [
             size: 20,
             type: 'MaterialIcons'
         }
-    },
-    {
+    }, */
+    /* {
         label: 'Routine',
         value: 'routine ',
         icon: {
@@ -139,7 +148,7 @@ const data = [
             size: 20,
             type: 'Foundation'
         }
-    },
+    }, */
     {
         label: 'Daily',
         value: 'daily',

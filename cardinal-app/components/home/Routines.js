@@ -3,13 +3,13 @@ import { Ionicons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import React, { useEffect, useMemo } from 'react'
 
-const Routines = () => {
+const Routines = ({theme}) => {
 
     const gradient = useMemo(() => [
-        ['#FFAFBD', '#ffc3a0'], // yellow to red
-        ['#38f9d7', '#43e97b'], //  cyan to green
-        ['#FDFCFB', '#E2D1C3'], // warm white to beige
-        ['#d4fc79', '#96e6a1'], // light green to mint
+        ['#b20a2c', '#fffbd5'], // yellow to red
+        ['#FFC371', '#FF5F6D'], //  cyan to green
+        ['#E2D1C3', '#FDFCFB'], // warm white to beige
+        ['#96e6a1','#d4fc79'], // light green to mint
     ], [])
 
     useEffect(() => {
@@ -45,7 +45,7 @@ const Routines = () => {
                                 // keep using the gradient array in ROTATION
                                 colors={gradient[index % gradient.length]}
                                 start={[0.5, 0]}
-                                end={[0.5, 1]}
+                                end={[1, 0.5]}
                                 style={{
                                     padding: 5,
                                     margin: 10,
@@ -106,12 +106,12 @@ const data = [
         id: 1
     },
     {
-        title: "Jogging 🏃🏼‍♂️ for 20 Minutes",
+        title: "Jog at least for 20 Minutes 🏃🏼‍♂️",
         completed: false,
         id: 2
     },
     {
-        title: "Complete Assignments 📝",
+        title: "Complete College Assignments 📝",
         completed: false,
         id: 5
     },

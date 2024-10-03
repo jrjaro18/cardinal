@@ -11,6 +11,7 @@ const CalendarComponent = ({currentMonth, theme, onDayPress, marked, setCurrentM
           {
             currentMonth != null ? (
               <Calendar
+                enableSwipeMonths={false}
                 style={{
                   borderRadius: 30,
                   elevation: 2,
@@ -21,7 +22,7 @@ const CalendarComponent = ({currentMonth, theme, onDayPress, marked, setCurrentM
                   dayTextColor: theme === 'light' ? '#2d3748' : '#e2e8f0',
                   monthTextColor: theme === 'light' ? '#2d3748' : '#e2e8f0',
                   textSectionTitleColor: theme === 'light' ? '#4a5568' : '#a0aec0',
-                  selectedDayBackgroundColor: 'rgb(0, 122, 255)',
+                  // selectedDayBackgroundColor: 'rgb(0, 122, 255)',
                   selectedDayTextColor: '#ffffff',
                   todayTextColor: 'rgb(0, 122, 255)',
                   arrowColor: theme === 'light' ? '#2d3748' : '#e2e8f0',

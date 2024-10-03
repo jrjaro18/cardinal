@@ -1,22 +1,15 @@
-import { View, Text, TouchableOpacity, Vibration, StyleSheet, ScrollView, Button } from 'react-native'
+import { View, Text, TouchableOpacity, Vibration, ScrollView } from 'react-native'
 import React, { useState, useCallback, useMemo, useLayoutEffect, useRef } from 'react'
 import { useTheme } from '../context/ThemeContext'
 import { StatusBar } from 'react-native'
 import { CalendarUtils } from 'react-native-calendars';
-import {
-  BottomSheetModal,
-  BottomSheetView,
-  BottomSheetModalProvider,
-  BottomSheetBackdrop,
-  BottomSheetScrollView,
-} from '@gorhom/bottom-sheet';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import Header from '../../components/home/Header'
 import CalendarComponent from '../../components/home/Calendar'
 import Remaing from '../../components/home/Remaing'
 import TaskIcons from '../../components/home/TaskIcons'
 import Routines from '../../components/home/Routines'
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Modal from '../../components/home/Modal';
 
 const INITIAL_DATE = new Date().getTime();
@@ -24,30 +17,10 @@ const INITIAL_DATE = new Date().getTime();
 const Home = () => {
   const statusbarheight = StatusBar.currentHeight;
   const { theme, toggleTheme } = useTheme();
-  const [selected, setSelected] = useState(INITIAL_DATE);
+  const [selected, setSelected] = useState(null);
+  const [markedDate, setMarkedDate] = useState(null);
   const [currentMonth, setCurrentMonth] = useState(null);
 
-  // bottom sheet modal
-  const bottomSheetModalRef = useRef(null);
-  const snapPoints = useMemo(() => ['75%'], []);
-  const handlePresentModalPress = useCallback(() => {
-    bottomSheetModalRef.current?.present();
-  }, []);
-  const handleSheetChanges = useCallback((index) => {
-    console.log('handleSheetChanges', index);
-    if (index === -1) setSelected(INITIAL_DATE);
-  }, []);
-  const backdropComponent = useCallback((props) => {
-    return (
-      <BottomSheetBackdrop
-        {...props}
-        enableTouchThrough={false}
-        pressBehavior={'close'}
-        disappearsOnIndex={-1}
-        appearsOnIndex={0}
-      />
-    )
-  })
 
   // Get the date for the current month
   const getDate = (date, count) => {
@@ -58,6 +31,7 @@ const Home = () => {
 
   const onDayPress = useCallback((day) => {
     setSelected(day.dateString);
+    setMarkedDate(day.dateString);
     Vibration.vibrate(5);
     handlePresentModalPress();
   }, []);
@@ -68,14 +42,20 @@ const Home = () => {
 
   const marked = useMemo(() => {
     return {
-      [selected]: {
+      [markedDate]: {
         selected: true,
         disableTouchEvent: true,
         selectedColor: 'rgb(0, 122, 255)',
         selectedTextColor: 'white',
       },
     };
-  }, [selected]);
+  }, [markedDate]);
+
+  const bottomSheetModalRef = useRef(null);
+
+  const handlePresentModalPress = useCallback(() => {
+    bottomSheetModalRef.current?.present();
+  }, []);
 
 
   return (
@@ -95,7 +75,7 @@ const Home = () => {
           />
           <Remaing />
           <TaskIcons />
-          <Routines />
+          <Routines theme={theme} />
 
           {/* Toggle themes button */}
           <TouchableOpacity onPress={toggleTheme}>
@@ -106,12 +86,12 @@ const Home = () => {
 
       <Modal
         bottomSheetModalRef={bottomSheetModalRef}
-        snapPoints={snapPoints}
-        handleSheetChanges={handleSheetChanges}
-        backdropComponent={backdropComponent}
+        markedDate={markedDate}
+        setMarkedDate={setMarkedDate}        
         selected={selected}
         setSelected={setSelected}
         getDate={getDate}
+        INITIAL_DATE={INITIAL_DATE}
         theme={theme}
       />
       
